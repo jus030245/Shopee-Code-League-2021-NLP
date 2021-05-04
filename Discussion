@@ -1,0 +1,22 @@
+#In this section, I would like to share what I did to differentiate my model from others'
+#The ideal solution was posted by shopee afterwards and it's pretty similar to my workflow. However, there might be some bug during my preprocessing.
+
+###See it differently
+  The biggest challenge within the project stands in the fact that 1.it is not written in a familiar language. 2. there are a lot of words in the answer
+that never appear in the training data. Given the above condition, lots of the participants may want to solve it with a Seq2Seq approach, since it makes more sense
+to let the model learn the whole sentence and decide how to answer with a slightly different fashion.
+  However, it must be noticed that the grading criterion for the prediction is extremely strict. All the space, punctation, spelling, orders for
+the two prediction within each address (POE and Street) need to be as same as Shopee's answer to obtain points. Therefore, with only 300,000 training data, and about
+1/5 of them contains typos or abbreviation it, it naturally follows that obtaining overall accuracy above 80% is infeasible.
+  Instead of trying to clean all the data at once, I separate the data into 'hard' and 'easy' by whether they contain typos or abbreviation. Then, we can approach the
+easy part with a NER model! By labeling the words as 'B-POE','I-POE','B-street','I-street', and 'O' for others, 4/5 of the data can be solved easily. And if we can
+obtain a 80% accuracy (which is not hard for NER models), I still have my upper bounds accuracy for approximately 64% which is not bad compared to final winner who score 70%.
+
+###Possible measure can be done
+1.opt for a different model, in this case, I only use a pretrained BERT-indonesian model
+2.GPU is also important, since i do not own one and i have to use colab. Training NLP networks does take extremely long time.
+3.try to use Seq2Seq model for the rest of 'hard' data
+4.punctuation should be processed like a window function.
+5.typos collected should be further examinated
+6.Further EDA within detected typos and abbreviation, I didn't check this since it's hard for me to read Indonesian but this can be done with the help with Google
+or your indonesian friends:)
