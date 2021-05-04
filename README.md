@@ -13,7 +13,7 @@ Challenge:
 1. The data are all written in Indonesian which makes it hard for EDA and feature engineering.
 2. The task was given without previous experience and knowledge in NLP.
 
-Workflow:
+Ideal Workflow:
 1. EDA
 2. Define Task - NER
 3. Grouping typos/abbreviations with desired words
