@@ -1,24 +1,16 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pandas as pd
 import numpy as np
 import time
 import re
 import torch
 
+#1.EDA and 2.Define Task 4.Data Preprocessing
 
-# In[2]:
-
-
+#This part is meant for observing and basic cleaning
+#Analysis can be started from the cleaned data "train_ez_transformed"
+##########################################################################################
 train = pd.read_csv('/Users/liu/Downloads/Address Elements Extraction Dataset/train.csv')
 test = pd.read_csv('/Users/liu/Downloads/Address Elements Extraction Dataset/test.csv')
-
-
-# In[3]:
 
 
 train[['POI', 'street']] = train['POI/street'].str.split('/', 1, expand=True)
@@ -28,38 +20,12 @@ train[['POI', 'street']] = train['POI/street'].str.split('/', 1, expand=True)
 train.head()
 
 
-# In[8]:
-
-
-def str_comp(row):
-    if pd.isnull(row['POI']):
-        return np.nan
-    else:
-        return (row['POI'] in row['raw_address'])
-train['POI_comp'] = train.apply(str_comp, axis=1)
-
-
-# In[9]:
-
-
 def str_comp(row):
     if pd.isnull(row['street']):
         return np.nan
     else:
         return (row['street'] in row['raw_address'])
 train['street_comp'] = train.apply(str_comp, axis=1)
-
-
-# In[84]:
-
-
-# from tensorflow.keras.preprocessing.text import Tokenizer
-# spliter = Tokenizer(num_words=None, filters='!"#$%()*+,-/:;<=>?@[\]^_`{|}~ ', lower=True, split=' ', char_level=False, 
-# oov_token=None, document_count=0)
-
-
-# In[6]:
-
 
 def transform(row):
     
@@ -81,22 +47,12 @@ def transform(row):
 
     return df
 
-
-# In[10]:
-
-
 train_ez = train[~((train['POI_comp'] == False)|(train['street_comp'] == False))]
 train_hard = train[(train['POI_comp'] == False)|(train['street_comp'] == False)]
 
 
-# In[14]:
-
-
 np.save('ez_index',np.array(train_ez.index))
 np.save('hard_index',np.array(train_hard.index))
-
-
-# In[8]:
 
 
 start = time.time()
@@ -111,46 +67,20 @@ train_ez_transformed = train_ez_transformed.reset_index(drop=True)
 print('Time: ',time.time()-start)
 train_ez_transformed.to_csv('train_ez_transformed_newjupyter.csv')
 
-
-# In[2]:
-
-
+##########################################################################################
 train_ez_transformed = pd.read_csv('train_ez_transformed.csv')
-
-
-# In[10]:
-
-
 train_ez_transformed['word'] = train_ez_transformed['word'].astype('str')
 
-
-# In[22]:
-
-
+#1.EDA
 print('空.:',np.sum(train['POI/street'].apply(lambda x: ' .' in x)))
 print('空.空:',np.sum(train['POI/street'].apply(lambda x: ' . ' in x)))
 print('.空:',np.sum(train['POI/street'].apply(lambda x: '. ' in x)))
 
-
-# In[18]:
-
-
 train['POI/street'] = train['POI/street'].astype('str')
-
-
-# In[19]:
-
-
 train['check'] = train['POI/street'].apply(lambda x: ' .' in x)
 
 
-# In[10]:
-
-
 train_ez_transformed['tag'].value_counts()
-
-
-# In[69]:
 
 
 train = pd.read_csv('/Users/liu/Downloads/Address Elements Extraction Dataset/train.csv')
@@ -179,9 +109,6 @@ print(',:',np.sum(train['POI/street'].apply(lambda x: ','in x)))
 print('::',np.sum(train['POI/street'].apply(lambda x: ':'in x)))
 
 
-# In[68]:
-
-
 train = pd.read_csv('/Users/liu/Downloads/Address Elements Extraction Dataset/train.csv')
 print('?:',np.sum(train['raw_address'].apply(lambda x: '?' in x)))
 print('(:',np.sum(train['raw_address'].apply(lambda x: '(' in x)))
@@ -207,10 +134,7 @@ print('":',np.sum(train['raw_address'].apply(lambda x: '"'in x)))
 print(',:',np.sum(train['raw_address'].apply(lambda x: ','in x)))
 print('::',np.sum(train['raw_address'].apply(lambda x: ':'in x)))
 
-
-# In[12]:
-
-
+#4.Preprocessing
 class SentenceGetter(object):
 
     def __init__(self, data):
@@ -231,41 +155,17 @@ class SentenceGetter(object):
             return None
 
 
-# In[13]:
-
-
 getter = SentenceGetter(train_ez_transformed)
-
-
-# In[14]:
-
-
 sentences = [[word[0] for word in sentence] for sentence in getter.sentences]
-
-
-# In[15]:
-
-
 labels = [[s[1] for s in sentence] for sentence in getter.sentences]
-
-
-# In[16]:
-
 
 tag_values = list(set(train_ez_transformed["tag"].values))
 tag_values.append("PAD")
 tag2idx = {t: i for i, t in enumerate(tag_values)}
 
-
-# In[55]:
-
-
 from transformers import BertTokenizer, BertModel
-model_name='cahya/bert-base-indonesian-522M'
+='cahya/bert-base-indonesian-522M'
 tokenizer = BertTokenizer.from_pretrained(model_name)
-
-
-# In[18]:
 
 
 def tokenize_and_preserve_labels(sentence, text_labels):
@@ -290,30 +190,18 @@ def tokenize_and_preserve_labels(sentence, text_labels):
     return tokenized_sentence, labels
 
 
-# In[19]:
-
-
 tokenized_texts_and_labels = [
     tokenize_and_preserve_labels(sent, labs)
     for sent, labs in zip(sentences, labels)
 ]
 
 
-# In[20]:
-
-
 tokenized_texts = [token_label_pair[0] for token_label_pair in tokenized_texts_and_labels]
 labels = [token_label_pair[1] for token_label_pair in tokenized_texts_and_labels]
 
 
-# In[23]:
-
-
 MAX_LEN = 50
 bs = 32
-
-
-# In[24]:
 
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences 
@@ -322,21 +210,15 @@ input_ids = pad_sequences([tokenizer.convert_tokens_to_ids(txt) for txt in token
                           truncating="post", padding="post")
 
 
-# In[26]:
-
 
 tags = pad_sequences([[tag2idx.get(l) for l in lab] for lab in labels],
                      maxlen=MAX_LEN, value=tag2idx["PAD"], padding="post",
                      dtype="long", truncating="post")
 
 
-# In[28]:
-
 
 attention_masks = [[float(i != 0.0) for i in ii] for ii in input_ids]
 
-
-# In[30]:
 
 
 from sklearn.model_selection import train_test_split
@@ -344,9 +226,6 @@ tr_inputs, val_inputs, tr_tags, val_tags = train_test_split(input_ids, tags,
                                                             random_state=2018, test_size=0.1)
 tr_masks, val_masks, _, _ = train_test_split(attention_masks, input_ids,
                                              random_state=2018, test_size=0.1)
-
-
-# In[34]:
 
 
 tr_inputs = torch.tensor(tr_inputs)
@@ -357,9 +236,6 @@ tr_masks = torch.tensor(tr_masks)
 val_masks = torch.tensor(val_masks)
 
 
-# In[36]:
-
-
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 train_data = TensorDataset(tr_inputs, tr_masks, tr_tags)
 train_sampler = RandomSampler(train_data)
@@ -368,18 +244,12 @@ valid_data = TensorDataset(val_inputs, val_masks, val_tags)
 valid_sampler = SequentialSampler(valid_data)
 valid_dataloader = DataLoader(valid_data, sampler=valid_sampler, batch_size=bs)
 
-
-# In[55]:
-
-
+#5.Model Building
 model = BertForTokenClassification.from_pretrained(model_name,
     num_labels=len(tag2idx),
     output_attentions = False,
     output_hidden_states = False
 )
-
-
-# In[43]:
 
 
 from transformers import BertForTokenClassification, AdamW
@@ -404,8 +274,6 @@ optimizer = AdamW(
 )
 
 
-# In[44]:
-
 
 from transformers import get_linear_schedule_with_warmup
 
@@ -423,13 +291,9 @@ scheduler = get_linear_schedule_with_warmup(
 )
 
 
-# In[52]:
-
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-# In[ ]:
 
 
 from sklearn.metrics import f1_score, accuracy_score
@@ -525,41 +389,10 @@ for _ in trange(epochs, desc="Epoch"):
     print("Validation F1-Score: {}".format(f1_score(pred_tags, valid_tags)))
     print()
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-###FOR EXAMINATION###
-
-
-# In[29]:
-
-
-from transformers import BertTokenizer, BertModel
-model_name='cahya/bert-base-indonesian-522M'
-tokenizer = BertTokenizer.from_pretrained(model_name)
-
-
-# In[43]:
-
-
+#6.Prediction and 7.Joining words
 model = torch.load('/Users/liu/Downloads/model_aftercomma',map_location=torch.device('cpu'))
 model_2 = torch.load('/Users/liu/Downloads/model_aftercomma_continue',map_location=torch.device('cpu'))
-
-
-# In[31]:
-
-
 tag_values = ['B-s', 'I-P', 'I-s', 'B-P', 'O', 'PAD']
-
-
-# In[44]:
 
 
 def get_prediction(raw_address):
@@ -583,35 +416,7 @@ def get_prediction(raw_address):
   return POI, street
 
 
-# In[139]:
-
-
-raw_address = comparison.iloc[703]['raw_address_comma']
-print(raw_address)
-
-
-# In[205]:
-
-
-print(get_prediction(raw_address))
-print(get_prediction_2(raw_address))
-
-
-# In[367]:
-
-
 def get_prediction_2(raw_address):
-#     global tokenized_sentence
-#     global input_ids
-#     global output
-#     global label_indices
-#     global tokens
-#     global new_tokens
-#     global new_labels
-#     global POI_ind
-#     global street_ind
-#     global s_start
-#     global s_end
 
     tokenized_sentence = tokenizer.encode(raw_address)
     input_ids = torch.tensor([tokenized_sentence])
@@ -634,22 +439,7 @@ def get_prediction_2(raw_address):
   street = " ".join([new_tokens[ind] for ind in index_s])
     return POI, street
 
-
-# In[ ]:
-
-
 def get_prediction_3(raw_address):
-#     global tokenized_sentence
-#     global input_ids
-#     global output
-#     global label_indices
-#     global tokens
-#     global new_tokens
-#     global new_labels
-#     global POI_ind
-#     global street_ind
-#     global s_start
-#     global s_end
 
     tokenized_sentence = tokenizer.encode(raw_address)
     input_ids = torch.tensor([tokenized_sentence])
@@ -685,33 +475,13 @@ def get_prediction_3(raw_address):
     return POI, street
 
 
-# In[361]:
-
-
-raw_address = 'ridho bakery, mare raya,'
-get_prediction_2(raw_address)
-
-
-# In[196]:
-
-
 train = train_ez
 comparison = pd.DataFrame()
-
-
-# In[134]:
-
-
 train_transformed = pd.read_csv('/Users/liu/train_ez_transformed.csv')
-
-
-# In[198]:
 
 
 comparison['id'], comparison['raw_address'], comparison['POI/street']  = train.iloc[:1000]['id'], train.iloc[:1000]['raw_address'], train.iloc[:1000]['POI/street']
 
-
-# In[199]:
 
 
 comparison['Prediction1'] = '/'
@@ -720,17 +490,11 @@ comparison = comparison.reset_index(drop=True)
 comparison = comparison.fillna('/')
 
 
-# In[266]:
-
 
 start = time.time()
 for i in range(comparison.shape[0]):
     comparison.at[i,'Prediction1'] = '/'.join(get_prediction(comparison.at[i,'raw_address']))
 print('time: ',time.time()-start)
-
-
-# In[348]:
-
 
 start = time.time()
 for i in range(comparison.shape[0]):
@@ -738,44 +502,27 @@ for i in range(comparison.shape[0]):
 print('time: ',time.time()-start)
 
 
-# In[360]:
-
-
+#Additioanl Debugging and Testing for different methods
 comparison[comparison['POI/street'] != comparison['Prediction2']]
-
-
-# In[285]:
 
 
 #法二對 法一錯
 comparison[(comparison['POI/street'] == comparison['Prediction2'])&(comparison['POI/street'] != comparison['Prediction1'])]
 
 
-# In[353]:
-
 
 #法二錯 法一對
 comparison[(comparison['POI/street'] != comparison['Prediction2'])&(comparison['POI/street'] == comparison['Prediction1'])]
-
-
-# In[288]:
 
 
 #都錯
 comparison[(comparison['POI/street'] != comparison['Prediction2'])&(comparison['POI/street'] != comparison['Prediction1'])].iloc[50:100]
 
 
-# In[128]:
-
-
 start = time.time()
 for i in range(comparison.shape[0]):
     comparison.at[i,'Prediction3'] = '/'.join(get_prediction(comparison.at[i,'raw_address_comma']))
 print('time: ',time.time()-start)
-
-
-# In[269]:
-
 
 def replace(x):
     x = x.replace(' .','.')
@@ -784,41 +531,16 @@ def replace(x):
     x = x.replace(',','')
     return x
 
-
-# In[84]:
-
-
 def replace_comma(x):
     return x.replace(',','')
 comparison['raw_address_comma'] = comparison['raw_address'].apply(replace_comma)
-
-
-# In[350]:
-
-
 comparison['Prediction1'] = comparison['Prediction1'].apply(replace)
 comparison['Prediction2'] = comparison['Prediction2'].apply(replace)
 
-
-# In[129]:
-
-
 comparison[~(comparison['Prediction1'] == comparison['POI/street'])].iloc[300:350]
-
-
-# In[175]:
-
-
+comparison[(comparison['Prediction1']!='/')&(comparison['POI/street']=='/')]
 comparison[(comparison['Prediction1']!='/')&(comparison['POI/street']=='/')]
 
-
-# In[176]:
-
-
-comparison[(comparison['Prediction1']!='/')&(comparison['POI/street']=='/')]
-
-
-# In[368]:
 
 
 #predict for the whole test set
@@ -829,83 +551,17 @@ print('time: ',time.time()-start)
 test['POI/street'] = test['POI/street'].apply(replace)
 
 
-# In[369]:
-
-
+#9.Submission
 #output final csv
 test.drop(columns='raw_address').to_csv('address_extraction_method2.csv',index=False)
-
-
-# In[15]:
-
-
 answer.to_csv('answer_0318noon.csv',index=False)
 
 
-# In[371]:
 
+#Note that though this correction idea is raised in the ideal workflow
+#However, since the time is limited so I decided to build the main part of the model first during the competition
 
-accu57 = pd.read_csv('/Users/liu/drop_dup.csv')
-
-
-# In[379]:
-
-
-comp = pd.concat([test,accu57],axis=1).drop(columns='id')
-
-
-# In[381]:
-
-
-comp.columns = ['raw_address','POI/street_method2','POI/street_accu57']
-
-
-# In[383]:
-
-
-comp[comp['POI/street_method2'] != comp['POI/street_accu57']]
-
-
-# In[15]:
-
-
-prediction = pd.read_csv('/Users/liu/drop_dup.csv')
-
-
-# In[45]:
-
-
-np.sum(prediction['POI/street'].apply(lambda x: 'indu' in x))
-
-
-# In[46]:
-
-
-train_hard
-
-
-# In[385]:
-
-
-train = pd.read_csv('/Users/liu/Downloads/Address Elements Extraction Dataset/train.csv')
-
-
-# In[ ]:
-
-
-#predict for the whole test set
-start = time.time()
-train['prediction'] = '/'
-for i in range(train.shape[0]):
-  train.at[i,'prediction'] = '/'.join(get_prediction(train.iloc[i]['raw_address']))
-print('time: ',time.time()-start)
-train['POI/street'] = train['POI/street'].apply(replace)
-train.to_csv('prediction_for_trainingset.csv')
-
-
-# In[8]:
-
-
+#3.Grouping typos/abbreviations with desired words 8.Adjust punctuation signs and Correct the typos/abbreviations from the dictionary
 from nltk.tokenize import word_tokenize
 def find_first_index(ra_split, st_split):
 
@@ -940,7 +596,6 @@ def find_first_index(ra_split, st_split):
         return 0
 
 
-# In[9]:
 
 
 def fix_street_errors(row):
@@ -973,8 +628,6 @@ def fix_street_errors(row):
         return raw_add
 
 
-# In[10]:
-
 
 def get_street_mapping_dict(row):
     
@@ -1004,20 +657,11 @@ def get_street_mapping_dict(row):
         return None
 
 
-# In[11]:
-
-
 start = time.time()
 
 train['street_mapping'] = train.apply(get_street_mapping_dict, axis=1)
 
 print("Executed in {} minutes.".format(round((time.time() - start)/60, 3)))
-
-# Sanity checks
-train.loc[[69, 86, 117, 130, 135, 169], :]
-
-
-# In[12]:
 
 
 # Create a separate dataframe containing only values in `street_mapping` columns, i.e., rows where changes occurred
@@ -1031,9 +675,6 @@ for row, col in df_with_street_mappings.iterrows():
     
 # How many street errors are there altogether?
 print("Length of street mapping dictionary:", len(street_mapping_dict))
-
-
-# In[13]:
 
 
 def get_poi_mapping_dict(row):
@@ -1064,9 +705,6 @@ def get_poi_mapping_dict(row):
         return None
 
 
-# In[14]:
-
-
 start = time.time()
 
 train['poi_mapping'] = train.apply(get_poi_mapping_dict, axis=1)
@@ -1075,10 +713,6 @@ print("Executed in {} minutes.".format(round((time.time() - start)/60, 3)))
 
 # Sanity checks
 train.loc[[10, 11, 40, 110, 152, 157, 169], :]
-
-
-# In[15]:
-
 
 # Create a separate dataframe containing only values in `poi_mapping` columns, i.e., rows where changes occurred
 df_with_poi_mappings = train[train['poi_mapping'].notnull()]
@@ -1093,50 +727,21 @@ for row, col in df_with_poi_mappings.iterrows():
 print("Length of POI mapping dictionary:", len(poi_mapping_dict))
 
 
-# In[16]:
-
-
 new_street_mapping_dict = {k: v for k, v in street_mapping_dict.items() if len(k.split()) > 1}
 new_poi_mapping_dict = {k: v for k, v in poi_mapping_dict.items() if len(k.split()) > 1}
 
 print("Length of street mapping dictionary after removing single words:", len(new_street_mapping_dict))
 print("Length of POI mapping dictionary after removing single words:", len(new_poi_mapping_dict))
 
-
-# In[17]:
-
-
 prediction57 = pd.read_csv('/Users/liu/drop_dup.csv')
-
-
-# In[21]:
 
 
 pd.DataFrame(['s. par','g. par']).replace({'. ':' '},regex=True)
 
 
-# In[28]:
-
 
 replacement = new_street_mapping_dict.copy()
 replacement.update(new_poi_mapping_dict)
-
-
-# In[32]:
-
-
-s = time.time()
-prediction57['fixed'] = prediction57['POI/street'].replace(replacement,regex=True)
-print('time: ',(s-time.time())/60)
-
-
-# In[ ]:
-
-
-prediction57.to_csv('prediction_fixed_singleno.csv',index=False)
-
-
-# In[ ]:
 
 
 new_street_mapping_dict = {k: v for k, v in street_mapping_dict.items() if len(k.split())}
@@ -1148,29 +753,12 @@ replacement_2 = new_street_mapping_dict.copy()
 replacement_2.update(new_poi_mapping_dict)
 print(len(replacement_2))
 
-
-# In[ ]:
-
-
 s = time.time()
 prediction57['fixed'] = prediction57['POI/street'].replace(replacement_2,regex=True)
 print('time: ',(s-time.time())/60)
 prediction57.to_csv('prediction_fixed_singleyes.csv',index=False)
 
-
-# In[189]:
-
-
-prediction57.head()
-
-
-# In[192]:
-
-
 prediction57.loc[0,'POI/street'].replace()
-
-
-# In[ ]:
 
 
 for i in range(prediction57.shape[0]):
@@ -1180,20 +768,10 @@ for i in range(prediction57.shape[0]):
         except:
             pass
 
-
-# In[ ]:
-
-
 prediction57.to_csv('prediction_fixed.csv',index=False)
 
 
-# In[ ]:
-
-
 replacement_2 = new_street_mapping_dict.copy().update(new_poi_mapping_dict)
-
-
-# In[ ]:
 
 
 for i in range(prediction57.shape[0]):
@@ -1202,9 +780,6 @@ for i in range(prediction57.shape[0]):
             prediction57.loc[i,'fixed'] = prediction57.loc[i,'POI/street'].replace(ori,new)
         except:
             pass
-
-
-# In[ ]:
 
 
 prediction57.to_csv('prediction_fixed_nosing.csv',index=False)
