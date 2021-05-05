@@ -1,5 +1,5 @@
 # Shopee-Code-League-2021-NLP
-This work is done within 6 days from starting learning NLP to hand in the prediction. This work is mean to record the original work presented without discussion and time pressure. The final work scores 57% in accuracy and ranked 14% out of 1000+ teams across Asia.
+This work is done within 6 days from starting learning NLP to hand in the prediction. This project is meant to record the original work presented without discussion and time pressure. The final work scores 57% in accuracy and ranked 14% out of 1000+ teams across Asia.
 Possible measure for better prediction will be discussed later.
 
 Problem Definition:
