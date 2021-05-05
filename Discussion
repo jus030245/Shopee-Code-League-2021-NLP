@@ -15,10 +15,12 @@ upper bounds accuracy for approximately 64% which is not bad compared to final w
 you are satisfied with the NER model.
 
 ###Possible measure can be done
-1.opt for a different model, in this case, I only use a pretrained BERT-indonesian model
-2.GPU is also important, since i do not own one and i have to use colab. Training NLP networks does take extremely long time.
+1.opt for a different model, in this case, I only use a pretrained BERT-indonesian model. Multilanguage models such as xlm-roberta.
+2.GPU is also important. Since i do not own one ,i have to use colab. It would be more efficient to work on deep learning problems with better working environment.
+Training NLP networks does take extremely long time.
 3.try to use Seq2Seq model for the rest of 'hard' data
-4.punctuation should be processed like a window function.
+4.punctuation should be processed like a window function. Personally, I consider this one the most trvial but important one. Since it could raise little issue when
+you need to get rid of some special character such as '#','$','/' as well you have to split the sentence into pieces and label them.
 5.typos collected should be further examinated
 6.Further EDA within detected typos and abbreviation, I didn't check this since it's hard for me to read Indonesian but this can be done with the help with Google
 or your indonesian friends:)
