@@ -10,7 +10,8 @@ the two predicted output (POE and Street) within each address need to be as same
 1/5 of them contains typos or abbreviation, it naturally follows that obtaining overall accuracy above 80% sounds infeasible.
   Instead of trying to clean all the data at once, I separate the data into 'hard' and 'easy' by whether they contain typos or abbreviation. Then, we can approach the
 easy part with a NER model! By labeling the words as 'B-POE','I-POE','B-street','I-street', and 'O' for others, 4/5 of the data can be solved easily. And if we can
-obtain a 80% accuracy (which is not hard for NER models) in the easy part (assuming the easy/hard is also around 1:4 in the testing test), I still have my upper bounds accuracy for approximately 64% which is not bad compared to final winner who score 70%.
+obtain a 80% accuracy (which is not hard for NER models) in the easy part (assuming the easy/hard is also around 1:4 in the testing test), I still have my 
+upper bounds accuracy for approximately 64% which is not bad compared to final winner who score 70%.
 
 ###Possible measure can be done
 1.opt for a different model, in this case, I only use a pretrained BERT-indonesian model
