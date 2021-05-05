@@ -4,7 +4,7 @@
 ###See it differently
   The biggest challenge within the project stands in the fact that 1.it is not written in a familiar language. 2. there are a lot of words in the answer
 that never appear in the training data. Given the above condition, lots of the participants may want to solve it with a Seq2Seq approach, since it makes more sense
-to let the model learn the whole sentence and decide how to answer with a slightly different fashion.
+to let the model learn the whole sentence and decide how to answer in a slightly different fashion.
   However, it must be noticed that the grading criterion for the prediction is extremely strict. All the space, punctation, spelling, orders for
 the two prediction within each address (POE and Street) need to be as same as Shopee's answer to obtain points. Therefore, with only 300,000 training data, and about
 1/5 of them contains typos or abbreviation it, it naturally follows that obtaining overall accuracy above 80% is infeasible.
